@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# Path to scripts
+script_path="/root/scripts"
+
+# Log file
+log_file="$(pwd)/log_file.log"
+
+# Arrays of script names
+raid_scripts=("raid04kb.config" "raid064kb.config" "raid0def.config")
+fs_scripts=("xfs.fs" "ext4.fs" "f2fs.fs" "btrfs.fs")
+benchmarks=("fio_bench.sh" "ior_bench.sh")
+
+# Loop through RAID configurations
+for raid_script in "${raid_scripts[@]}"; do
+    echo "Running RAID script: $raid_script" | tee -a $log_file
+    "${script_path}/${raid_script}" | tee -a $log_file
+    echo "Currently set RAID configuration: $raid_script" | tee -a 
+$log_file
+
+    # Loop through filesystems
+    for fs_script in "${fs_scripts[@]}"; do
+        echo "Running FS script: $fs_script" | tee -a $log_file
+        "${script_path}/${fs_script}" | tee -a $log_file
+        echo "Currently set filesystem: $fs_script" | tee -a $log_file
+
+        # Loop through benchmarks
+        for bench in "${benchmarks[@]}"; do
+            echo "Running benchmark: $bench on filesystem: $fs_script with 
+RAID configuration: $raid_script" | tee -a $log_file
+            "${script_path}/${bench}" | tee -a $log_file
+        done
+    done
+done
+
+echo "Benchmarks are complete" | tee -a $log_file
+
